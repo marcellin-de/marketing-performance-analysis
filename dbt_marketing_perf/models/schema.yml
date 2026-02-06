@@ -1,0 +1,187 @@
+version: 2
+
+models:
+  - name: stg_order_item_refunds
+    description: "Staging des remboursements d'items"
+    columns:
+      - name: order_item_refund_id
+        tests:
+          - not_null
+          - unique
+      - name: order_item_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_order_items')
+                field: order_item_id
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: created_at
+        tests:
+          - not_null
+      - name: refund_amount_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+  - name: stg_order_items
+    description: "Staging des items de commande"
+    columns:
+      - name: order_item_id
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: product_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: created_at
+        tests:
+          - not_null
+      - name: price_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: cogs_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: is_primary_item
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0,1]
+
+  - name: stg_orders
+    description: "Staging des commandes"
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+      - name: created_at
+        tests:
+          - not_null
+      - name: website_session_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_website_sessions')
+                field: website_session_id
+      - name: user_id
+        tests:
+          - not_null
+      - name: primary_product_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: items_purchased
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 1"
+      - name: price_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: cogs_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+  - name: stg_products
+    description: "Staging des produits"
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: created_at
+        tests:
+          - not_null
+      - name: product_name
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_website_pageviews
+    description: "Staging des pages vues par session"
+    columns:
+      - name: website_pageview_id
+        tests:
+          - not_null
+          - unique
+      - name: created_at
+        tests:
+          - not_null
+      - name: website_session_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_website_sessions')
+                field: website_session_id
+      - name: pageview_url
+        tests:
+          - not_null
+
+  - name: stg_website_sessions
+    description: "Staging des sessions utilisateurs"
+    columns:
+      - name: website_session_id
+        tests:
+          - not_null
+          - unique
+      - name: created_at
+        tests:
+          - not_null
+      - name: user_id
+        tests:
+          - not_null
+      - name: is_repeat_session
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0,1]
+      - name: device_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["desktop","mobile","tablet"]
+      - name: utm_source
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["google","bing","facebook","direct","other"]

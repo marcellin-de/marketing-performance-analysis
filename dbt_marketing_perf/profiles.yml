@@ -20,12 +20,12 @@ dbt_marketing_perf:
       user: "{{ env_var('SNOWFLAKE_USER') }}"
       password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
       role: ACCOUNTADMIN
-      database: "{{ env_var('SNOWFLAKE_DATABASE_PROD', 'PROD_CAR_SHOP_PLATFORM') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE_PROD') }}"
       warehouse: "{{ env_var('PROD_SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
       schema: public
       threads: 8
       client_session_keep_alive: false
-      query_tag: dbt_vehicle_analytics_prod
+      query_tag: dbt_marketing_perf_prod
 
 
 elementary:
@@ -38,6 +38,6 @@ elementary:
       password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
       role: "{{ env_var('SNOWFLAKE_ROLE', 'ACCOUNTADMIN') }}"
       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
-      database: "{{ env_var('SNOWFLAKE_DATABASE', 'DEV_CAR_SHOP_PLATFORM') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
       schema: ELEMENTARY  
       threads: 4
