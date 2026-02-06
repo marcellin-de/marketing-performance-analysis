@@ -185,3 +185,213 @@ models:
           - accepted_values:
               arguments:
                 values: ["google","bing","facebook","direct","other"]
+
+  - name: int_sessions_orders
+    description: "Intermediate join of sessions and orders"
+    columns:
+      - name: website_session_id
+        tests:
+          - not_null
+      - name: session_created_at
+        tests:
+          - not_null
+      - name: user_id
+        tests:
+          - not_null
+      - name: is_order_session
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0,1]
+
+  - name: int_order_items_enriched
+    description: "Intermediate order items enriched with orders, products, and refunds"
+    columns:
+      - name: order_item_id
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id
+      - name: product_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+      - name: price_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: cogs_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      - name: refund_amount_usd
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+  - name: dim_products
+    description: "Products dimension"
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_users
+    description: "Users dimension derived from sessions and orders"
+    columns:
+      - name: user_id
+        tests:
+          - not_null
+          - unique
+      - name: first_session_at
+        tests:
+          - not_null
+
+  - name: fct_sessions
+    description: "Session-level fact table with order attribution"
+    tests:
+      - elementary.schema_changes
+    columns:
+      - name: website_session_id
+        tests:
+          - not_null
+          - unique
+      - name: session_created_at
+        tests:
+          - not_null
+      - name: session_date
+        tests:
+          - not_null
+      - name: utm_source
+        tests:
+          - not_null
+      - name: is_order_session
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0,1]
+
+  - name: fct_orders
+    description: "Order-level fact table with marketing attribution"
+    tests:
+      - elementary.schema_changes
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+      - name: order_created_at
+        tests:
+          - not_null
+      - name: order_date
+        tests:
+          - not_null
+      - name: website_session_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_sessions')
+                field: website_session_id
+      - name: order_revenue_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+  - name: fct_order_items
+    description: "Order item fact table with refunds"
+    columns:
+      - name: order_item_id
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
+      - name: refund_amount_usd
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+  - name: fct_refunds
+    description: "Refund-level fact table"
+    columns:
+      - name: order_item_refund_id
+        tests:
+          - not_null
+          - unique
+      - name: refund_amount_usd
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+  - name: kpi_daily_marketing_channels
+    description: "{{ doc('kpi_daily_marketing_channels') }}"
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [date_day, utm_source]
+    columns:
+      - name: date_day
+        tests:
+          - not_null
+      - name: utm_source
+        tests:
+          - not_null
+      - name: sessions
+        tests:
+          - not_null
+      - name: orders
+        tests:
+          - not_null
+      - name: conversion_rate
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+
+  - name: kpi_daily_overview
+    description: "{{ doc('kpi_daily_overview') }}"
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [date_day]
+    columns:
+      - name: date_day
+        tests:
+          - not_null
+      - name: conversion_rate
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
