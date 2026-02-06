@@ -1,0 +1,10 @@
+dlt
+dlt[snowflake]
+dagster
+dbt-core 
+dbt-snowflake
+dagster-webserver 
+dagster-dbt
+elementary-data
+elementary-data[snowflake]
+polars
