@@ -1,0 +1,27 @@
+version: 2
+
+exposures:
+  - name: marketing_kpis_dashboard
+    type: dashboard
+    maturity: high
+    description: "Executive dashboard for daily marketing performance and channel attribution."
+    url: "https://example.com/marketing-kpis"
+    owner:
+      name: Analytics Team
+      email: analytics@example.com
+    depends_on:
+      - ref('kpi_daily_overview')
+      - ref('kpi_daily_marketing_channels')
+
+  - name: product_performance_analysis
+    type: analysis
+    maturity: medium
+    description: "Ad-hoc analysis for product performance, refunds, and profitability."
+    owner:
+      name: Growth Analytics
+      email: growth@example.com
+    depends_on:
+      - ref('fct_orders')
+      - ref('fct_order_items')
+      - ref('fct_refunds')
+      - ref('dim_products')
