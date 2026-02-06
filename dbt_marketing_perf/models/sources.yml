@@ -1,0 +1,14 @@
+sources:
+  - name: marketing_perf_source
+    database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+    description: Raw data from database in raw schema
+    schema: raw
+
+    tables:
+      - name: website_sessions
+      - name: orders
+      - name: order_items
+      - name: order_item_refunds
+      - name: website_pages
+      - name: products
+
