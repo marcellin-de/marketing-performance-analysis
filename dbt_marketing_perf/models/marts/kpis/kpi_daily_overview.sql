@@ -1,3 +1,9 @@
+{{ config(
+    materialized='incremental',
+    unique_key='date_day',
+    on_schema_change='sync_all_columns'
+) }}
+
 select
     date_day,
     sum(sessions) as sessions,
@@ -10,4 +16,9 @@ select
     case when sum(orders) = 0 then 0 else sum(revenue_usd) / sum(orders) end as revenue_per_order_usd,
     case when sum(sessions) = 0 then 0 else sum(revenue_usd) / sum(sessions) end as revenue_per_session_usd
 from {{ ref('kpi_daily_marketing_channels') }}
+{% if is_incremental() %}
+where date_day >= (
+    select dateadd(day, -3, max(date_day)) from {{ this }}
+)
+{% endif %}
 group by 1

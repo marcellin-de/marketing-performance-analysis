@@ -5,7 +5,7 @@ exposures:
     type: dashboard
     maturity: high
     description: "Executive dashboard for daily marketing performance and channel attribution."
-    url: "https://example.com/marketing-kpis"
+    url: "http://localhost:3000/public/dashboard/998d3922-02d0-44d4-8fcc-4a863cee58a4"
     owner:
       name: Analytics Team
       email: analytics@example.com

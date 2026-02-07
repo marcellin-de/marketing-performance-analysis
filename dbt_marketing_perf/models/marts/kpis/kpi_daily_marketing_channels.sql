@@ -1,3 +1,9 @@
+{{ config(
+    materialized='incremental',
+    unique_key=['date_day', 'utm_source'],
+    on_schema_change='sync_all_columns'
+) }}
+
 with sessions as (
     select
         session_date as date_day,
@@ -62,3 +68,8 @@ select
     case when orders = 0 then 0 else revenue_usd / orders end as revenue_per_order_usd,
     case when sessions = 0 then 0 else revenue_usd / sessions end as revenue_per_session_usd
 from combined
+{% if is_incremental() %}
+where date_day >= (
+    select dateadd(day, -3, max(date_day)) from {{ this }}
+)
+{% endif %}

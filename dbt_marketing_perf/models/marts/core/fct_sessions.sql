@@ -1,3 +1,9 @@
+{{ config(
+    materialized='incremental',
+    unique_key='website_session_id',
+    on_schema_change='sync_all_columns'
+) }}
+
 with sessions_orders as (
     select
         website_session_id,
@@ -38,3 +44,8 @@ select
     (price_usd - cogs_usd) as order_gross_margin_usd,
     is_order_session
 from sessions_orders
+{% if is_incremental() %}
+where session_created_at >= (
+    select dateadd(day, -3, max(session_created_at)) from {{ this }}
+)
+{% endif %}
