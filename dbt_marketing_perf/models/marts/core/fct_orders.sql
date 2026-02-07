@@ -1,3 +1,9 @@
+{{ config(
+    materialized='incremental',
+    unique_key='order_id',
+    on_schema_change='sync_all_columns'
+) }}
+
 with orders as (
     select
         order_id,
@@ -44,3 +50,8 @@ select
 from orders o
 left join sessions s
     on o.website_session_id = s.website_session_id
+{% if is_incremental() %}
+where o.order_created_at >= (
+    select dateadd(day, -3, max(order_created_at)) from {{ this }}
+)
+{% endif %}
