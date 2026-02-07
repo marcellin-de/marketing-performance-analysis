@@ -6,8 +6,8 @@ dbt_marketing_perf:
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
       user: "{{ env_var('SNOWFLAKE_USER') }}"
       password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
-      role: "{{ env_var('SNOWFLAKE_ROLE', 'ACCOUNTADMIN') }}"
-      database: "{{ env_var('SNOWFLAKE_DATABASE', 'DEV_CAR_SHOP_PLATFORM') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
       schema: public   
       threads: 4
@@ -19,7 +19,7 @@ dbt_marketing_perf:
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
       user: "{{ env_var('SNOWFLAKE_USER') }}"
       password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
-      role: ACCOUNTADMIN
+      role: "{{ env_var('ACCOUNTADMIN') }}"
       database: "{{ env_var('SNOWFLAKE_DATABASE_PROD') }}"
       warehouse: "{{ env_var('PROD_SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH') }}"
       schema: public
