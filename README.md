@@ -19,7 +19,7 @@ CSV (data/)
 ```
 
 ## Modern Data Stack Diagram
-![Modern Data Stack](docs/modern data stack.png)
+![Modern Data Stack](docs/modern-data-stack.png)
 
 ## Stack
 - Ingestion: `dlt` + `polars`
